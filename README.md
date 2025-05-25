@@ -1,5 +1,11 @@
-#backend running:
+## Cách chạy ứng dụng
+
+### Backend
+
+```bash
 cd backend
 fastapi dev main.py
-#frontend running:
-dỉrectly open html file.
+```
+### Frontend
+
+Mở trực tiếp file HTML trong trình duyệt
