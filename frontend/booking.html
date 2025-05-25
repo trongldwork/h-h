@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ thống đặt vé - Cinema Booking</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px 0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 30px;
+        }
+        
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: #2d3748;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .ticket-counter {
+            background: #4299e1;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 30px;
+        }
+        
+        .booking-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .booking-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .ticket-section {
+            text-align: center;
+        }
+        
+        .ticket-price {
+            font-size: 48px;
+            font-weight: bold;
+            color: #4299e1;
+            margin: 20px 0;
+        }
+        
+        .ticket-info {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+        
+        .book-btn {
+            background: linear-gradient(135deg, #4299e1, #2b6cb0);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(66, 153, 225, 0.4);
+        }
+        
+        .book-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(66, 153, 225, 0.6);
+        }
+        
+        .book-btn:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .seat-selector {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 40px;
+            align-items: start;
+        }
+        
+        .seat-controls {
+            background: #f7fafc;
+            padding: 25px;
+            border-radius: 15px;
+            min-width: 320px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+        
+        .input-group select, .input-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .input-group select:focus, .input-group input:focus {
+            outline: none;
+            border-color: #4299e1;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+        }
+        
+        .cinema-layout {
+            background: #1a202c;
+            padding: 30px;
+            border-radius: 15px;
+            position: relative;
+        }
+        
+        .screen {
+            background: linear-gradient(135deg, #4299e1, #2b6cb0);
+            height: 8px;
+            border-radius: 4px;
+            margin-bottom: 40px;
+            position: relative;
+        }
+        
+        .screen::after {
+            content: "🎬 MÀN HÌNH";
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #e2e8f0;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .seats-grid {
+            display: grid;
+            grid-template-columns: repeat(20, 1fr);
+            gap: 4px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .seat {
+            aspect-ratio: 1;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            min-width: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        
+        .seat.available {
+            background: #48bb78;
+            box-shadow: 0 2px 4px rgba(72, 187, 120, 0.3);
+        }
+        
+        .seat.available:hover {
+            background: #38a169;
+            transform: scale(1.1);
+        }
+        
+        .seat.booked {
+            background: #e53e3e;
+            cursor: not-allowed;
+        }
+        
+        .seat.selected {
+            background: #ed8936;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(237, 137, 54, 0.5);
+            border: 2px solid #fff;
+        }
+        
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 25px 0;
+            color: #e2e8f0;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+        
+        .legend-seat {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+        }
+        
+        .selected-seats-summary {
+            background: #2d3748;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .selected-seats-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 10px 0;
+        }
+        
+        .selected-seat-chip {
+            background: #ed8936;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .remove-seat {
+            cursor: pointer;
+            font-weight: bold;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+        
+        .remove-seat:hover {
+            opacity: 1;
+        }
+        
+        .batch-book-btn {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(72, 187, 120, 0.4);
+            width: 100%;
+            margin-top: 15px;
+        }
+        
+        .batch-book-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(72, 187, 120, 0.6);
+        }
+        
+        .batch-book-btn:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .clear-selection-btn {
+            background: linear-gradient(135deg, #f56565, #e53e3e);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+        
+        .clear-selection-btn:hover {
+            background: linear-gradient(135deg, #e53e3e, #c53030);
+        }
+        
+        .notification {
+            position: fixed;
+            top: 100px;
+            right: 30px;
+            padding: 20px 25px;
+            border-radius: 10px;
+            color: white;
+            font-weight: bold;
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            max-width: 350px;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.success {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+        }
+        
+        .notification.error {
+            background: linear-gradient(135deg, #e53e3e, #c53030);
+        }
+        
+        .notification.info {
+            background: linear-gradient(135deg, #4299e1, #3182ce);
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .method-selector {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            justify-content: center;
+        }
+        
+        .method-btn {
+            padding: 8px 16px;
+            border: 2px solid #e2e8f0;
+            background: white;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .method-btn.active {
+            background: #4299e1;
+            border-color: #4299e1;
+            color: white;
+        }
+        
+        .reset-btn {
+            background: linear-gradient(135deg, #ed8936, #dd6b20);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(237, 137, 54, 0.3);
+        }
+        
+        .reset-btn:hover {
+            background: linear-gradient(135deg, #dd6b20, #c05621);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(237, 137, 54, 0.4);
+        }
+        
+        .reset-btn:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        @media (max-width: 768px) {
+            .seat-selector {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .seats-grid {
+                grid-template-columns: repeat(10, 1fr);
+            }
+            
+            .container {
+                padding: 20px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">
+                🎭 CinemaBook
+            </div>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <button class="reset-btn" onclick="resetSystem()" title="Reset toàn bộ hệ thống">
+                    🔄 Reset
+                </button>
+                <div class="ticket-counter" id="ticketCounter">
+                    🎫 <span id="ticketCount">500</span> vé còn lại
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <!-- Ticket Booking Section -->
+        <div class="booking-card">
+            <div class="card-title">
+                🎫 Mua vé xem phim
+            </div>
+            <div class="ticket-section">
+                <div class="ticket-price">150.000₫</div>
+                <div class="ticket-info">
+                    <h3>🎬 AVENGERS: ENDGAME</h3>
+                    <p>⏰ Suất chiếu: 19:30 - 22:45</p>
+                    <p>📅 Ngày: Hôm nay</p>
+                    <p>🏢 Rạp: Galaxy Cinema</p>
+                </div>
+                
+                <div class="method-selector">
+                    <div class="method-btn active" data-method="mutex">🔒 Mutex</div>
+                    <div class="method-btn" data-method="semaphore">🚦 Semaphore</div>
+                    <div class="method-btn" data-method="spinlock">🔄 Spinlock</div>
+                </div>
+                
+                <button class="book-btn" id="buyTicketBtn" onclick="buyTicket()">
+                    Mua vé ngay
+                </button>
+            </div>
+        </div>
+        
+        <!-- Seat Booking Section -->
+        <div class="booking-card">
+            <div class="card-title">
+                🪑 Chọn ghế ngồi
+            </div>
+            <div class="seat-selector">
+                <div class="seat-controls">
+                    <div class="input-group">
+                        <label>Phương pháp đồng bộ:</label>
+                        <select id="seatMethod">
+                            <option value="mutex">🔒 Mutex</option>
+                            <option value="semaphore">🚦 Semaphore</option>
+                            <option value="spinlock">🔄 Spinlock</option>
+                        </select>
+                    </div>
+                    
+                    <div class="selected-seats-summary" id="selectedSeatsPanel" style="display: none;">
+                        <div style="font-weight: bold; margin-bottom: 10px;">
+                            <span id="selectedCount">0</span> ghế đã chọn
+                        </div>
+                        <div class="selected-seats-list" id="selectedSeatsList"></div>
+                        
+                        <button class="batch-book-btn" id="batchBookBtn" onclick="bookMultipleSeats()">
+                            Đặt tất cả ghế đã chọn
+                        </button>
+                        
+                        <button class="clear-selection-btn" onclick="clearSelection()">
+                            Xóa tất cả lựa chọn
+                        </button>
+                    </div>
+                    
+                    <div style="margin-top: 20px; padding: 15px; background: #e6fffa; border-radius: 8px; border-left: 4px solid #38b2ac;">
+                        <div style="font-weight: bold; color: #2c7a7b; margin-bottom: 5px;">💡 Hướng dẫn:</div>
+                        <div style="color: #2c7a7b; font-size: 14px;">
+                            • Click vào ghế để chọn/bỏ chọn<br>
+                            • Có thể chọn nhiều ghế cùng lúc<br>
+                            • Nhấn "Đặt tất cả" để book hàng loạt
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="cinema-layout">
+                    <div class="screen"></div>
+                    
+                    <div class="legend">
+                        <div class="legend-item">
+                            <div class="legend-seat seat available"></div>
+                            <span>Còn trống</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-seat seat booked"></div>
+                            <span>Đã đặt</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-seat seat selected"></div>
+                            <span>Đang chọn</span>
+                        </div>
+                    </div>
+                    
+                    <div class="seats-grid" id="seatsGrid">
+                        <!-- Seats will be generated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="notification" id="notification"></div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000';
+        let selectedMethod = 'mutex';
+        let selectedSeats = new Set(); // Changed from single seat to multiple seats
+        let currentSeats = [];
+        
+        // Initialize the application
+        async function init() {
+            await updateTicketCounter();
+            await loadSeats();
+            setupEventListeners();
+        }
+        
+        function setupEventListeners() {
+            // Method selector for tickets
+            document.querySelectorAll('.method-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.method-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    selectedMethod = this.dataset.method;
+                });
+            });
+            
+            // Seat method change
+            document.getElementById('seatMethod').addEventListener('change', function() {
+                clearSelection();
+                loadSeats();
+            });
+        }
+        
+        async function apiCall(endpoint, method = 'GET') {
+            try {
+                const response = await fetch(`${API_BASE}${endpoint}`, { method });
+                return await response.json();
+            } catch (error) {
+                return { error: error.message };
+            }
+        }
+        
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 4000);
+        }
+        
+        async function updateTicketCounter() {
+            const status = await apiCall('/status');
+            if (status.tickets_left !== undefined) {
+                document.getElementById('ticketCount').textContent = status.tickets_left;
+                
+                // Disable ticket buying if no tickets left
+                const buyBtn = document.getElementById('buyTicketBtn');
+                if (status.tickets_left === 0) {
+                    buyBtn.disabled = true;
+                    buyBtn.textContent = 'Hết vé';
+                } else {
+                    buyBtn.disabled = false;
+                    buyBtn.textContent = 'Mua vé ngay';
+                }
+            }
+        }
+        
+        async function buyTicket() {
+            const btn = document.getElementById('buyTicketBtn');
+            const originalText = btn.textContent;
+            
+            btn.innerHTML = '<span class="loading"></span> Đang xử lý...';
+            btn.disabled = true;
+            
+            try {
+                const result = await apiCall(`/buy-ticket/${selectedMethod}`, 'POST');
+                
+                if (result.status === 'success') {
+                    showNotification('🎉 Mua vé thành công! Chúc bạn xem phim vui vẻ!', 'success');
+                    await updateTicketCounter();
+                } else {
+                    showNotification('😞 ' + result.msg, 'error');
+                }
+            } catch (error) {
+                showNotification('❌ Có lỗi xảy ra: ' + error.message, 'error');
+            } finally {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
+        }
+        
+        async function loadSeats() {
+            const method = document.getElementById('seatMethod').value;
+            const result = await apiCall(`/seats/${method}`);
+            
+            if (result.seats) {
+                currentSeats = result.seats;
+                renderSeats();
+            } else {
+                showNotification('Không thể tải sơ đồ ghế', 'error');
+            }
+        }
+        
+        function renderSeats() {
+            const grid = document.getElementById('seatsGrid');
+            grid.innerHTML = '';
+            
+            currentSeats.forEach((row, rowIndex) => {
+                row.forEach((seatStatus, colIndex) => {
+                    const seat = document.createElement('div');
+                    seat.className = `seat ${seatStatus === 0 ? 'available' : 'booked'}`;
+                    seat.title = `Hàng ${rowIndex + 1}, Cột ${colIndex + 1}`;
+                    
+                    if (seatStatus === 0) {
+                        seat.addEventListener('click', () => toggleSeat(rowIndex, colIndex));
+                    }
+                    
+                    // Mark selected seats
+                    const seatKey = `${rowIndex}-${colIndex}`;
+                    if (selectedSeats.has(seatKey)) {
+                        seat.classList.add('selected');
+                    }
+                    
+                    grid.appendChild(seat);
+                });
+            });
+        }
+        
+        function toggleSeat(row, col) {
+            const seatKey = `${row}-${col}`;
+            
+            if (selectedSeats.has(seatKey)) {
+                selectedSeats.delete(seatKey);
+            } else {
+                selectedSeats.add(seatKey);
+            }
+            
+            updateSelectedSeatsDisplay();
+            renderSeats(); // Re-render to show selection
+        }
+        
+        function updateSelectedSeatsDisplay() {
+            const panel = document.getElementById('selectedSeatsPanel');
+            const countElement = document.getElementById('selectedCount');
+            const listElement = document.getElementById('selectedSeatsList');
+            
+            countElement.textContent = selectedSeats.size;
+            
+            if (selectedSeats.size === 0) {
+                panel.style.display = 'none';
+                return;
+            }
+            
+            panel.style.display = 'block';
+            
+            // Create seat chips
+            listElement.innerHTML = '';
+            Array.from(selectedSeats).sort().forEach(seatKey => {
+                const [row, col] = seatKey.split('-').map(Number);
+                const chip = document.createElement('div');
+                chip.className = 'selected-seat-chip';
+                chip.innerHTML = `
+                    ${row + 1}-${col + 1}
+                    <span class="remove-seat" onclick="removeSeat('${seatKey}')">×</span>
+                `;
+                listElement.appendChild(chip);
+            });
+        }
+        
+        function removeSeat(seatKey) {
+            selectedSeats.delete(seatKey);
+            updateSelectedSeatsDisplay();
+            renderSeats();
+        }
+        
+        function clearSelection() {
+            selectedSeats.clear();
+            updateSelectedSeatsDisplay();
+            renderSeats();
+        }
+        
+        async function bookMultipleSeats() {
+            if (selectedSeats.size === 0) {
+                showNotification('Vui lòng chọn ít nhất một ghế trước khi đặt', 'error');
+                return;
+            }
+            
+            const method = document.getElementById('seatMethod').value;
+            const btn = document.getElementById('batchBookBtn');
+            const originalText = btn.textContent;
+            
+            btn.innerHTML = '<span class="loading"></span> Đang đặt ghế...';
+            btn.disabled = true;
+            
+            let successCount = 0;
+            let failCount = 0;
+            const totalSeats = selectedSeats.size;
+            
+            try {
+                // Book seats one by one
+                for (const seatKey of selectedSeats) {
+                    const [row, col] = seatKey.split('-').map(Number);
+                    
+                    // Check if seat is still available
+                    if (currentSeats[row][col] !== 0) {
+                        failCount++;
+                        continue;
+                    }
+                    
+                    try {
+                        const result = await apiCall(`/book-seat/${method}/${row}/${col}`, 'POST');
+                        
+                        if (result.status === 'success') {
+                            successCount++;
+                        } else {
+                            failCount++;
+                        }
+                    } catch (error) {
+                        failCount++;
+                    }
+                }
+                
+                // Show results
+                if (successCount > 0 && failCount === 0) {
+                    showNotification(`🎉 Đặt thành công ${successCount} ghế!`, 'success');
+                } else if (successCount > 0 && failCount > 0) {
+                    showNotification(`⚠️ Đặt thành công ${successCount}/${totalSeats} ghế. ${failCount} ghế đã bị đặt bởi khách khác.`, 'info');
+                } else {
+                    showNotification(`😞 Không thể đặt ghế nào. Tất cả ${failCount} ghế đã bị đặt.`, 'error');
+                }
+                
+                // Clear selection and refresh
+                clearSelection();
+                await loadSeats();
+                
+            } catch (error) {
+                showNotification('❌ Có lỗi xảy ra: ' + error.message, 'error');
+            } finally {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
+        }
+        
+        async function resetSystem() {
+            const resetBtn = document.querySelector('.reset-btn');
+            const originalText = resetBtn.textContent;
+            
+            resetBtn.innerHTML = '<span class="loading"></span> Đang reset...';
+            resetBtn.disabled = true;
+            
+            try {
+                const result = await apiCall('/reset', 'POST');
+                
+                if (result.msg) {
+                    showNotification('🔄 ' + result.msg + ' - Hệ thống đã được làm mới!', 'success');
+                    
+                    // Reset UI state
+                    clearSelection();
+                    
+                    // Refresh all data
+                    await updateTicketCounter();
+                    await loadSeats();
+                } else {
+                    showNotification('❌ Không thể reset hệ thống', 'error');
+                }
+            } catch (error) {
+                showNotification('❌ Có lỗi xảy ra khi reset: ' + error.message, 'error');
+            } finally {
+                resetBtn.textContent = originalText;
+                resetBtn.disabled = false;
+            }
+        }
+        
+        // Initialize when page loads
+        window.addEventListener('load', init);
+        
+        // Auto-refresh every 5 seconds to keep data current
+        setInterval(async () => {
+            await updateTicketCounter();
+            await loadSeats();
+        }, 5000);
+    </script>
+</body>
+</html>
